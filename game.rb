@@ -1,29 +1,38 @@
-# TODO Create Game Class
-# Game class is responsible for logic:
-# - Checking for win and tie
-# - Switching between players
-# - Resetting the game
-# - Validating user input
-# - Making calls to update the game board
-# TODO Create Gameboard class
-
 class Gameboard
   def initialize
-    current_number = 0
-    @grid = Array.new(3) { Array.new(3) { current_number += 1 } }
+    # current_number = 0
+    # @grid = Array.new(3) { Array.new(3) { current_number += 1 } }
+    @grid = Array.new(3) { Array.new(3, ' ') }
   end
 
   def display
     # Display the board
+    # @grid.each_with_index do |row, index|
+    #  puts row.map { |num| num.to_s.rjust(2) }.join(' | ')
+    #  puts '----' * 3 unless index == @grid.size - 1
+    # end
+    puts "\n"
     @grid.each_with_index do |row, index|
-      puts row.map { |num| num.to_s.rjust(2) }.join(' | ')
-      puts '----' * 3 unless index == @grid.size - 1
+      puts row.join(' | ')
+      puts '---------' unless index == @grid.size - 1
     end
   end
 
   def place_symbol(row, col, symbol)
     # Place 'X' or 'O' on the board
-    @grid[row][col] = symbol
+    if cell_empty?(row, col)
+      @grid[row][col] = symbol
+    else
+      print "Cell taken! Please choose another cell!"
+    end
+  end
+
+  def cell_empty?(row, col)
+    if (@grid[row][col] = "")
+      true
+    else
+      false
+    end
   end
 
   def check_winner
@@ -47,35 +56,70 @@ class Gameboard
 end
 
 class Game
+  # Initialize players or other game settings
   def initialize
     @board = Gameboard.new
-    # Initialize players or other game settings
+    @current_player = "X"
+    @game_over = false
   end
 
   def play
-    # Main game loop
-    # - Prompt players for moves
-    # - Update board
-    # - Check for game end conditions
+    until @game_over
+      @board.display
+      player_turn(@current_player)
+      @game_over = game_over?
+      switch_player unless @game_over
+      if (@game_over)
+        conclude_game
+      end
+    end
   end
 
   private
 
   def player_turn(player)
-    # Handle a player's turn
+    valid_move = false
+    until valid_move
+      puts "#{player}, enter your move (row, col):"
+      input = gets.chomp.split(',').map(&:strip).map(&:to_i)
+
+      if input.size == 2 && input.all? { |num| num.is_a?(Integer) }
+        row, col = input
+        if valid_move?(row, col)
+          @board.place_symbol(row, col, player)
+          valid_move = true
+        else
+          puts "Invalid move. Please try again."
+        end
+      else
+        puts "Please enter a valid move in the format 'row,col'."
+      end
+    end
+  end
+
+  def valid_move?(row, col)
+    # Check if the move is within the board and the cell is empty
+    row.between?(0, 2) && col.between?(0, 2) && @board.cell_empty?(row, col)
   end
 
   def game_over?
-    # Check if the game is ov    #
+    # Check if the game is over
+    @board.check_winner == "X" || @board.check_winner == "O" || @board.check_winner == "Draw"
+  end
+
+  def switch_player
+    @current_player = @current_player == "X" ? "O" : "X"
+  end
+
+  def conclude_game
+    winner = @board.check_winner
+    if winner == "Draw"
+      puts "Game is a draw!"
+    else
+      puts "#{winner} wins the game!"
+    end
   end
 end
 
-game = Gameboard.new
-game.display
-puts "\n"
-game.place_symbol(0, 0, "X")
-game.place_symbol(0, 1, "X")
-game.place_symbol(0, 2, "X")
-# game.place_symbol(1, 1, "O")
-game.display
-p game.check_winner
+game = Game.new
+game.play
