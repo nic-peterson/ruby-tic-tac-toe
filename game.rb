@@ -1,16 +1,10 @@
 class Gameboard
   def initialize
-    # current_number = 0
-    # @grid = Array.new(3) { Array.new(3) { current_number += 1 } }
     @grid = Array.new(3) { Array.new(3, ' ') }
   end
 
   def display
     # Display the board
-    # @grid.each_with_index do |row, index|
-    #  puts row.map { |num| num.to_s.rjust(2) }.join(' | ')
-    #  puts '----' * 3 unless index == @grid.size - 1
-    # end
     puts "\n"
     @grid.each_with_index do |row, index|
       puts row.join(' | ')
